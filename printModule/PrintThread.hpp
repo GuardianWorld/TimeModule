@@ -16,6 +16,8 @@ private:
     bool stop_printing;
     std::thread thread;
 
+    std::string accumulated_message;
+
     void printThread(){
         while (true) {
             std::unique_lock<std::mutex> lock(mtx);
@@ -26,7 +28,7 @@ private:
             lock.unlock();
 
             // Print the message
-            std::cout << "[ " << DateTimeFormat::build_internal_time_string() << " ]" << message << std::endl;
+            std::cout << "[ " << DateTimeFormat::build_internal_time_string() << " ]" << message << std::flush;
         }
     }
 public:
@@ -76,6 +78,21 @@ public:
         pt.print(message);
         return pt;
     }
+
+
+    friend PrintThread& operator<<(PrintThread& pt, const char* message) {
+        pt.print(message);
+        return pt;
+    }
+
+    // friend PrintThread& operator<<(PrintThread& pt, const std::ostream& (*manip)(std::ostream&)) {
+    //     std::unique_lock<std::mutex> lock(pt.mtx);
+    //     pt.print_queue.push(pt.accumulated_message);
+    //     pt.accumulated_message.clear();
+    //     lock.unlock();
+    //     pt.cv.notify_one();
+    //     return pt;
+    // }
 };
 
 #endif // PRINTTHREAD_HPP

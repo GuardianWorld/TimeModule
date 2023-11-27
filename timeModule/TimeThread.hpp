@@ -24,13 +24,14 @@ private:
     std::thread clock_thread;
     bool is_running;
 
+    DayOfWeek day_of_week;
+
     //Day/Month/Year.
     int day;
     int month;
     int year;
 
     int hour;
-    bool morning;
     int minute;
     int second;
     int millisecond;
@@ -39,29 +40,14 @@ private:
     HourType hour_format;
     bool human_simplified;
 
-
-    void correct_hour_format(){
-        if (hour_format == HourType::H12) {
-            if (hour == 0) {
-                hour = 12; // 12:00 AM is midnight
-                morning = true;
-            } else if (hour == 12) {
-                morning = false; // 12:00 PM is noon
-            } else if (hour > 12) {
-                hour -= 12;
-                morning = false;
-            } else {
-                morning = true;
-            }
-        }
-    }
-
     void update_time_data(){
         current_time = std::chrono::system_clock::now();
         
         auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(current_time.time_since_epoch()).count();
         std::time_t now_t = std::chrono::system_clock::to_time_t(current_time);
         std::tm* now_tm = std::localtime(&now_t);
+
+        day_of_week = static_cast<DayOfWeek>(now_tm->tm_wday);
 
         year = now_tm->tm_year + 1900;
         month = now_tm->tm_mon + 1;
@@ -70,8 +56,6 @@ private:
         minute = now_tm->tm_min;
         second = now_tm->tm_sec;
         millisecond = milliseconds % 1000;
-
-        correct_hour_format();
     }
 
     void time_update(){
@@ -82,7 +66,7 @@ private:
     }
 
     void initializing_routine(){
-        time_update_interval = 100;
+        time_update_interval = 150;
         tick_counter = 0;
         previous_update_tick = 0;
         tick_delay = 2;
@@ -140,7 +124,6 @@ public:
     int get_second()        const { return second;      }
     int get_millisecond()   const { return millisecond; }
 
-    bool get_morning() { return morning; }
     bool get_human_simplified() { return human_simplified; }
 
     DateType get_date_format(){ return date_format; }
@@ -148,15 +131,15 @@ public:
 
     //Set
     void set_time_update_interval(int new_value){
-        const int time_update_upper_limit = 1000;
-        const int time_update_lower_limit = 10;
+        const int time_update_upper_limit = 500;
+        const int time_update_lower_limit = 50;
 
         this->time_update_interval = std::clamp(new_value, time_update_lower_limit, time_update_upper_limit);
     }
 
     void set_tick_delay(int new_value){
-        const int tick_delay_upper_Limit = 1000;
-        const int tick_delay_lower_limit = 10;
+        const int tick_delay_upper_Limit = 10;
+        const int tick_delay_lower_limit = 1;
 
         this->tick_delay = std::clamp(new_value, tick_delay_lower_limit, tick_delay_upper_Limit);
     }
@@ -189,6 +172,10 @@ public:
 
         std::vector<long> time_components = {elapsed_hours, elapsed_minutes, elapsed_seconds, elapsed_ms};
         return time_components;
+    }
+
+    DayOfWeek get_day_of_week(){
+        return day_of_week;
     }
 
 };

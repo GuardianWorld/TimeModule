@@ -15,14 +15,22 @@ int main()
 {
 	TimeThread& clock = TimeThread::getInstance();
     PrintThread& printer = PrintThread::getInstance();
+	AlarmManager alarmManager(clock, printer);
 
-	//std::this_thread::sleep_for(std::chrono::milliseconds(10));
-
-	printer << "Hello World!";
-	printer << "Testing";
+	printer << "Hello World!\n \f";
+	printer << "Testing\n";
 
 	int x = 0;
-	//std::cin >> x;
+	int hour = 0;
+	int minute = 0;
+	while(hour != -1){
+		printer << "Enter an hour and minute to add an alarm (or -1 to exit): ";
+		std::cin >> hour;
+		if(hour == -1) break;
+		std::cin >> minute;
+		alarmManager.add_alarm(AlarmManager::build_alarm("Test", hour, minute));
+		printer << "Alarm added! Now to wait!\n";
+	}
 
 	// Ensure the printing thread finishes before exiting
 

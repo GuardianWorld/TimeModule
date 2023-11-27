@@ -3,5 +3,6 @@
 
 #include "TimeThread.hpp"
 #include "DateTimeFormat.hpp"
+#include "AlarmManager.hpp"
 
 #endif // TIMEMODULE_TIMEIMPORT_HPP
